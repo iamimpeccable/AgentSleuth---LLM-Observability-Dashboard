@@ -2,14 +2,7 @@
 from transformers import pipeline
 from telemetry import run_with_telemetry
 from database import save_record
-
-questions = [
-    "What is an LLM?",
-    "Explain retrieval augmented generation (RAG) simply.",
-    "What is the difference between AI and machine learning?",
-    "Why is monitoring latency important in an LLM application?",
-    "Explain Python dictionaries with a simple example."
-]
+from prompts import all_prompts
 
 records = []
 
@@ -18,15 +11,21 @@ generator = pipeline(
     model="Qwen/Qwen2.5-1.5B-Instruct"
 )
 
-for prompt in questions:
+for item in all_prompts:
+    prompt = item["prompt"]
     record = run_with_telemetry(generator, prompt)
-    records.append(record)
+    record["prompt_id"] = item["prompt_id"]
+    record["category"] = item["category"]
     record["model_name"] = "Qwen/Qwen2.5-1.5B-Instruct"
     record.setdefault("error_message", None)
+    records.append(record)
 
     try:
         save_record(record)
-        print("Saved to PostgreSQL!")
+        print(
+           f"Saved {record['prompt_id']} "
+           f"({record['category']}) to PostgreSQL"
+        )
     except Exception as error:
         print(f"Database save failed: {error}")
 

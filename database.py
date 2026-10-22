@@ -1,6 +1,6 @@
 
 import os
-
+import uuid
 import psycopg
 from dotenv import load_dotenv
 
@@ -22,6 +22,8 @@ def save_record(record):
         INSERT INTO llm_requests (
             request_id,
             model_name,
+            prompt_id,
+            category,
             prompt,
             response,
             latency_seconds,
@@ -33,6 +35,8 @@ def save_record(record):
         VALUES (
             %(request_id)s,
             %(model_name)s,
+            %(prompt_id)s,
+            %(category)s,
             %(prompt)s,
             %(response)s,
             %(latency_seconds)s,
@@ -59,8 +63,10 @@ if __name__ == "__main__":
                 print(version[0])
 
         test_record = {
-            "request_id": "133fa350-6495-4534-8b5f-99af1f04fd8f",
+            "request_id": str(uuid.uuid4()),
             "model_name": "Qwen/Qwen2.5-1.5B-Instruct",
+            "prompt_id": None,
+            "category": None,
             "prompt": "What is an LLM?",
             "response": "An LLM is a large language model.",
             "latency_seconds": 2.50,
